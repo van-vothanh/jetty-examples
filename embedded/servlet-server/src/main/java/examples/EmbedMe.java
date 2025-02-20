@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -33,17 +34,17 @@ public class EmbedMe
     public static void main(String[] args) throws Exception
     {
         int port = 8080;
-        Server server = newServer(port);
+        Server server = newServer(port, UriCompliance.DEFAULT);
         server.start();
         server.join();
     }
 
-    public static Server newServer(int port)
+    public static Server newServer(int port, UriCompliance uriCompliance)
     {
         Server server = new Server();
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
-        // httpConfiguration.setUriCompliance(UriCompliance.LEGACY);
+        httpConfiguration.setUriCompliance(uriCompliance);
         HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(httpConfiguration);
         ServerConnector connector = new ServerConnector(server, httpConnectionFactory);
         connector.setPort(port);

@@ -13,20 +13,21 @@
 
 package examples;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpTester;
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,54 +39,58 @@ import static org.hamcrest.Matchers.is;
 public class EmbedMeTest
 {
     private Server server;
-    private HttpClient client;
-
-    @BeforeEach
-    public void startServer() throws Exception
-    {
-        server = EmbedMe.newServer(0);
-        server.start();
-    }
-
-    @BeforeEach
-    public void startClient() throws Exception
-    {
-        client = new HttpClient();
-        client.start();
-    }
 
     @AfterEach
     public void stopAll()
     {
-        LifeCycle.stop(client);
         LifeCycle.stop(server);
     }
 
-    @Test
-    public void testGetWelcome() throws InterruptedException, ExecutionException, TimeoutException
+    public static Stream<Arguments> httpGetsDefault()
     {
-        Request request = client.newRequest(server.getURI().resolve("/"))
-            .method("GET");
-        ContentResponse response = request.send();
-        assertThat(response.getStatus(), is(200));
-        assertThat(response.getContentAsString(), containsString("<title>Welcome File</title>"));
-    }
-
-    public static Stream<Arguments> httpGets()
-    {
-        String expectedTime = new Date().toString();
-        int idx = expectedTime.indexOf(" "); // Wed
-        idx = expectedTime.indexOf(" ", idx+1); // Feb
-        idx = expectedTime.indexOf(" ", idx+1); // 19
-        expectedTime = expectedTime.substring(0, idx); // Wed Feb 19
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd");
+        String expectedTime = simpleDateFormat.format(new Date());
 
         return Stream.of(
             Arguments.of("/", 200, "<title>Welcome File</title>"),
-            // Arguments.of("//", 200, ""), // Uncomment if using UriCompliance.LEGACY
             Arguments.of("/test", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
-            Arguments.of("//test", 200, "<title>Welcome File</title>"), // empty path segment
+            Arguments.of("//test", 400, "<h1>Bad Message 400</h1>"),
             Arguments.of("/test/", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
-            Arguments.of("//test/", 200, "<title>Welcome File</title>"),
+            Arguments.of("//test/", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a/b", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a/b/c", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a/", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a/b/", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("//test/a/b/c/", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("/time", 200, expectedTime),
+            Arguments.of("//time", 400, "<h1>Bad Message 400</h1>"),
+            Arguments.of("/time/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//time/", 400, "<h1>Bad Message 400</h1>")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("httpGetsDefault")
+    public void testHttpGetDefault(String path, int expectedStatus, String expectedText) throws Exception
+    {
+        server = EmbedMe.newServer(0, UriCompliance.DEFAULT);
+        server.start();
+
+        testHttpGet(path, expectedStatus, expectedText);
+    }
+
+    public static Stream<Arguments> httpGetsLegacy()
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd");
+        String expectedTime = simpleDateFormat.format(new Date());
+
+        return Stream.of(
+            Arguments.of("/", 200, "<title>Welcome File</title>"),
+            Arguments.of("/test", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
+            Arguments.of("//test", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("/test/", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
+            Arguments.of("//test/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("//test/a", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("//test/a/b", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("//test/a/b/c", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
@@ -93,22 +98,39 @@ public class EmbedMeTest
             Arguments.of("//test/a/b/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("//test/a/b/c/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("/time", 200, expectedTime),
-            Arguments.of("//time", 200, "<title>Welcome File</title>"),
+            Arguments.of("//time", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("/time/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
-            Arguments.of("//time/", 200, "<title>Welcome File</title>") // empty path segment
+            Arguments.of("//time/", 404, "<h2>HTTP ERROR 404 Not Found</h2>")
         );
     }
 
     @ParameterizedTest
-    @MethodSource("httpGets")
-    public void testHttpGet(String path, int expectedStatus, String expectedText) throws InterruptedException, ExecutionException, TimeoutException
+    @MethodSource("httpGetsLegacy")
+    public void testHttpGetLegacy(String path, int expectedStatus, String expectedText) throws Exception
+    {
+        server = EmbedMe.newServer(0, UriCompliance.LEGACY);
+        server.start();
+
+        testHttpGet(path, expectedStatus, expectedText);
+    }
+
+    private void testHttpGet(String path, int expectedStatus, String expectedText) throws Exception
     {
         URI serverURI = server.getURI();
-        Request request = client.newRequest(serverURI.getHost(), serverURI.getPort())
-            .path(path)
-            .method("GET");
-        ContentResponse response = request.send();
-        assertThat(response.getStatus(), is(expectedStatus));
-        assertThat(response.getContentAsString(), containsString(expectedText));
+        try (Socket client = new Socket(serverURI.getHost(), serverURI.getPort());
+             OutputStream out = client.getOutputStream();
+             InputStream in = client.getInputStream())
+        {
+            String rawRequest = String.format("GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", path, serverURI.getAuthority());
+
+            out.write(rawRequest.getBytes(StandardCharsets.UTF_8));
+            out.flush();
+
+            String rawResponse = IO.toString(in);
+            HttpTester.Response response = HttpTester.parseResponse(rawResponse);
+
+            assertThat(response.getStatus(), is(expectedStatus));
+            assertThat(response.getContent(), containsString(expectedText));
+        }
     }
 }
