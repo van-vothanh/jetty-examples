@@ -84,8 +84,14 @@ public class EmbedMeTest
             // Arguments.of("//", 200, ""), // Uncomment if using UriCompliance.LEGACY
             Arguments.of("/test", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
             Arguments.of("//test", 200, "<title>Welcome File</title>"), // empty path segment
-            Arguments.of("/test/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("/test/", 200, "This content from <code>{war}/WEB-INF/html/index.html</code>"),
             Arguments.of("//test/", 200, "<title>Welcome File</title>"),
+            Arguments.of("//test/a", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//test/a/b", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//test/a/b/c", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//test/a/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//test/a/b/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
+            Arguments.of("//test/a/b/c/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
             Arguments.of("/time", 200, expectedTime),
             Arguments.of("//time", 200, "<title>Welcome File</title>"),
             Arguments.of("/time/", 404, "<h2>HTTP ERROR 404 Not Found</h2>"),
