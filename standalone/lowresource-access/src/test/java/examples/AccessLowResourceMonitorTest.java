@@ -20,8 +20,8 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.eclipse.jetty.deploy.DeploymentManager;
-import org.eclipse.jetty.deploy.providers.ContextProvider;
+import org.eclipse.jetty.deploy.DeploymentScanner;
+import org.eclipse.jetty.deploy.StandardDeployer;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.LowResourceMonitor;
 import org.eclipse.jetty.server.Server;
@@ -66,19 +66,19 @@ public class AccessLowResourceMonitorTest
             war.addDir(Paths.get("src/main/webapp"));
         }
 
+        // enable environment
+        Environment.ensure("ee10", Server.class);
+
         // enable hot deployment
-        DeploymentManager deployer = new DeploymentManager();
-        deployer.setContexts(contexts);
-
-        Environment.ensure("ee10");
-
-        ContextProvider webAppProvider = new ContextProvider();
-        webAppProvider.setEnvironmentName("ee10");
-        webAppProvider.setMonitoredDirName(jettyBase + "/webapps");
-        webAppProvider.setScanInterval(0);
-        webAppProvider.setExtractWars(true);
-        deployer.addAppProvider(webAppProvider);
+        StandardDeployer deployer = new StandardDeployer(contexts);
         server.addBean(deployer);
+
+        DeploymentScanner deploymentScanner = new DeploymentScanner(server, deployer);
+        deploymentScanner.addMonitoredDirectory(jettyBase.resolve("webapps"));
+        deploymentScanner.setScanInterval(0);
+        DeploymentScanner.EnvironmentConfig environmentConfig = deploymentScanner.configureEnvironment("ee10");
+        environmentConfig.setExtractWars(true);
+        deployer.addBean(deploymentScanner);
 
         // add LowResourceMonitor
         LowResourceMonitor lowResourcesMonitor = new LowResourceMonitor(server);
