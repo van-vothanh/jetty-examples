@@ -19,11 +19,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jetty.deploy.App;
-import org.eclipse.jetty.deploy.AppLifeCycle;
-import org.eclipse.jetty.deploy.DeploymentManager;
-import org.eclipse.jetty.deploy.graph.Node;
-import org.eclipse.jetty.deploy.providers.ContextProvider;
+import org.eclipse.jetty.deploy.Deployer;
+import org.eclipse.jetty.deploy.DeploymentScanner;
+import org.eclipse.jetty.deploy.StandardDeployer;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -48,9 +46,9 @@ public class WebAppsHotDeployExample
         ContextAttributeCustomizer contextAttributeCustomizer = new ContextAttributeCustomizer();
         contextAttributeCustomizer.setAttribute("common.conf", confFile);
 
-        DeploymentManager deploymentManager = new DeploymentManager();
-        deploymentManager.setContexts(contexts);
-        deploymentManager.addLifeCycleBinding(contextAttributeCustomizer);
+        StandardDeployer deployer = new StandardDeployer(contexts);
+        deployer.addEventListener(contextAttributeCustomizer);
+        server.addBean(deployer);
 
         String jettyBaseProp = System.getProperty("jetty.base");
         if (jettyBaseProp == null)
@@ -59,12 +57,10 @@ public class WebAppsHotDeployExample
         }
         Path jettyBase = Path.of(jettyBaseProp).toAbsolutePath();
 
-        ContextProvider webAppProvider = new ContextProvider();
-        webAppProvider.setEnvironmentName("ee10");
-        webAppProvider.setMonitoredDirName(jettyBase.resolve("webapps").toString());
-
-        deploymentManager.addAppProvider(webAppProvider);
-        server.addBean(deploymentManager);
+        DeploymentScanner deploymentScanner = new DeploymentScanner(server, deployer);
+        deploymentScanner.addMonitoredDirectory(jettyBase.resolve("webapps"));
+        deploymentScanner.configureEnvironment("ee10");
+        deployer.addBean(deploymentScanner);
 
         // Lets dump the server after start.
         // We can look for the deployed contexts, along with an example of the
@@ -74,7 +70,7 @@ public class WebAppsHotDeployExample
         server.join();
     }
 
-    public static class ContextAttributeCustomizer implements AppLifeCycle.Binding
+    public static class ContextAttributeCustomizer implements Deployer.Listener
     {
         public final Map<String, Object> attributes = new HashMap<>();
 
@@ -84,20 +80,9 @@ public class WebAppsHotDeployExample
         }
 
         @Override
-        public String[] getBindingTargets()
+        public void onCreated(ContextHandler contextHandler)
         {
-            return new String[]{AppLifeCycle.DEPLOYING};
-        }
-
-        @Override
-        public void processBinding(Node node, App app) throws Exception
-        {
-            ContextHandler handler = app.getContextHandler();
-            if (handler == null)
-            {
-                throw new NullPointerException("No Handler created for App: " + app);
-            }
-            attributes.forEach((name, value) -> handler.setAttribute(name, value));
+            attributes.forEach(contextHandler::setAttribute);
         }
     }
 }
