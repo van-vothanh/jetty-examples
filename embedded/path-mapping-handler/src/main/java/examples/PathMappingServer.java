@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.PathMappingsHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.Callback;
@@ -100,10 +101,8 @@ public class PathMappingServer
         //   against it's base resource.
 
         pathMappingsHandler.addMapping(PathSpec.from("/"), rootResourceHandler);
-        pathMappingsHandler.addMapping(PathSpec.from("/extras/*"),
-            new StripContextPath("/extras", extraResourceHandler));
-        pathMappingsHandler.addMapping(PathSpec.from("/jars/*"),
-            new StripContextPath("/jars", metaInfResourceHandler));
+        pathMappingsHandler.addMapping(PathSpec.from("/extras/*"), extraResourceHandler);
+        pathMappingsHandler.addMapping(PathSpec.from("/jars/*"), metaInfResourceHandler);
         // Example of a mapping to an extension.
         pathMappingsHandler.addMapping(PathSpec.from("*.png"),
             new PathNameWrapper((path) ->
@@ -115,7 +114,10 @@ public class PathMappingServer
             }, extraResourceHandler));
         pathMappingsHandler.addMapping(PathSpec.from("/hello/*"), new HelloHandler("Mappings"));
 
-        server.setHandler(pathMappingsHandler);
+        ContextHandler contextHandler = new ContextHandler();
+        contextHandler.setContextPath("/");
+        contextHandler.setHandler(pathMappingsHandler);
+        server.setHandler(contextHandler);
         return server;
     }
 
@@ -134,19 +136,6 @@ public class PathMappingServer
             throw new FileNotFoundException("Classloader Configuration error: No META-INF/resources entries found");
 
         return ResourceFactory.combine(resources);
-    }
-
-    private static class StripContextPath extends PathNameWrapper
-    {
-        public StripContextPath(String contextPath, Handler handler)
-        {
-            super((path) ->
-            {
-                if (path.startsWith(contextPath))
-                    return path.substring(contextPath.length());
-                return path;
-            }, handler);
-        }
     }
 
     private static class PathNameWrapper extends Handler.Wrapper
