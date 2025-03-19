@@ -5,6 +5,7 @@
 * [`compressed-encoding/`](compressed-encoding/) - GzipHandler support on Jetty Server for dynamically compressing responses
 * [`connectors/`](connectors/) - Using Connector names and virtual hosts on webapps to bind specific webapps to specific connectors
 * [`deploying/`](deploying/) - Setup a delayed webapp hot deployment.
+* [`error-handling/`](error-handling/) - How to customize the ErrorHandler in core Jetty
 * [`ee8-jsp/`](ee8-jsp/) - Enable JSP processing in EE8 Servlet environment (with Taglib)
 * [`ee8-webapp-context/`](ee8-webapp-context/) - Setup an EE8 WebAppContext from File System or Classpath
 * [`ee10-error-handling/`](ee10-error-handling/) - Setup and configure EE10 Servlet / WebApp Error Handling

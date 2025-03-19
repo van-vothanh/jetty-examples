@@ -18,6 +18,7 @@
     <module>compressed-encoding</module>
     <module>connectors</module>
     <module>deploying</module>
+    <module>error-handling</module>
     <module>ee8-jsp</module>
     <module>ee8-webapp-context</module>
     <module>ee10-error-handling</module>

@@ -35,6 +35,9 @@ public class DumpHandler extends Handler.Abstract
         {
             out.printf("Method: %s%n", request.getMethod());
             out.printf("HttpURI: %s%n", request.getHttpURI());
+            out.printf("HttpURI.path: %s%n", request.getHttpURI().getPath());
+            out.printf("HttpURI.canonicalPath: %s%n", request.getHttpURI().getCanonicalPath());
+            out.printf("HttpURI.decodedPath: %s%n", request.getHttpURI().getDecodedPath());
             out.flush();
             callback.succeeded();
         }

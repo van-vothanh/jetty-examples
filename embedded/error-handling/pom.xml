@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.eclipse.jetty.examples.embedded</groupId>
     <artifactId>jetty-embedded-examples</artifactId>
-    <version>12.1.x</version>
+    <version>12.0.x</version>
   </parent>
-  <artifactId>form-post</artifactId>
-  <version>12.1.x</version>
+  <artifactId>error-handling</artifactId>
+  <version>12.0.x</version>
   <packaging>jar</packaging>
-  <name>Jetty Examples :: Jetty 12.1.x :: Embedded :: HTML Form POST</name>
+  <name>Jetty Examples :: Jetty 12.0.x :: Embedded :: Core Error Handling</name>
 
   <dependencies>
     <dependency>
@@ -23,35 +23,11 @@
       <version>${jetty.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.18.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>4.5.14</version>
-      <scope>test</scope>
-      <exclusions>
-        <!-- we want to use jcl-over-slf4j instead, so that these common-logging events route to slf4j -->
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
       <version>${jetty-test-helper.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
+
 </project>

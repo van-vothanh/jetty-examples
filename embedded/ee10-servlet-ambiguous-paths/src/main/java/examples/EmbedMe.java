@@ -35,7 +35,8 @@ public class EmbedMe
         Server server = new Server();
 
         HttpConfiguration httpConfig = new HttpConfiguration();
-        httpConfig.setUriCompliance(UriCompliance.UNSAFE);
+        UriCompliance uriCompliance = UriCompliance.LEGACY.with("custom", UriCompliance.Violation.SUSPICIOUS_PATH_CHARACTERS);
+        httpConfig.setUriCompliance(uriCompliance);
 
         HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(httpConfig);
         ServerConnector connector = new ServerConnector(server, httpConnectionFactory);
@@ -44,10 +45,12 @@ public class EmbedMe
 
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
+        // Allow ServletContext to accept ambiguous uris.
         context.getServletHandler().setDecodeAmbiguousURIs(true);
         context.addServlet(AmbiguousPathServlet.class, "/*");
 
         server.setHandler(context);
+        //server.setDumpAfterStart(true);
         return server;
     }
 }

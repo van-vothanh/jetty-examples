@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URLDecoder;
+import java.util.stream.Stream;
 
 import org.eclipse.jetty.http.HttpTester;
 import org.eclipse.jetty.server.Server;
@@ -26,21 +26,22 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
-public class EmbedMeTest
+public class StripExtraSlashesExampleTest
 {
     private Server server;
 
     @BeforeEach
     public void startServer() throws Exception
     {
-        server = EmbedMe.newServer(0);
+        server = StripExtraSlashesExample.newServer(0);
         server.start();
     }
 
@@ -50,32 +51,42 @@ public class EmbedMeTest
         LifeCycle.stop(server);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-        // SUSPICIOUS_PATH_CHARACTERS
-        "/git/branch/fix%0Arefactor",
-        "/git/branch/fix%5Crefactor",
-        // AMBIGUOUS_PATH_ENCODING
-        "/git/branch/fix%25refactor",
-        // AMBIGUOUS_PATH_SEPARATOR
-        "/git/branch/fix%2Frefactor",
-        // AMBIGUOUS_EMPTY_SEGMENT
-        "/git/branch/fix//refactor"
-    })
-    public void testAmbiguousPathSeparator(String path) throws IOException
-    {
-        URI uri = server.getURI();
 
+    public static Stream<Arguments> rewriteCases()
+    {
+        return Stream.of(
+            Arguments.of("/", "/"),
+            Arguments.of("/dump", "/dump"),
+            Arguments.of("/dump/", "/dump/"),
+            Arguments.of("//", "/"),
+            Arguments.of("//dump", "/dump"),
+            Arguments.of("//dump/", "/dump/"),
+            Arguments.of("//dump/b", "/dump/b"),
+            Arguments.of("///toomany", "/toomany"),
+            Arguments.of("//////toomany/", "/toomany/"),
+            Arguments.of("//////toomany//deep", "/toomany//deep"),
+            Arguments.of("/%2Fencoded", "/%2Fencoded"),
+            Arguments.of("//%2Fencoded/", "/%2Fencoded/"),
+            // path parameters in the mix
+            Arguments.of("/;a=b/", "/;a=b/"),
+            Arguments.of("/;a=b//", "/;a=b//"),
+            Arguments.of("/;/dump", "/;/dump")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("rewriteCases")
+    public void testRewrite(String inputPath, String expectedPath) throws IOException
+    {
         String rawRequest = """
-            GET @PATH@ HTTP/1.1
-            Host: @AUTHORITY@
+            GET %s HTTP/1.1
+            Host: www.example.org
             Connection: close
             
-            """.replace("@PATH@", path).replace("@AUTHORITY@", uri.getAuthority());
+            """.formatted(inputPath);
 
-        // Using raw sockets to ensure that we send exactly what we want.
-        // Using a proper HttpClient can often lead to the path being encoded/decoded in ways
-        // that this test case isn't wanting.
+        URI uri = server.getURI();
+
         try (Socket socket = new Socket(uri.getHost(), uri.getPort());
              OutputStream out = socket.getOutputStream();
              InputStream in = socket.getInputStream())
@@ -85,11 +96,8 @@ public class EmbedMeTest
 
             HttpTester.Response response = HttpTester.parseResponse(in);
             assertThat(response.getStatus(), is(200));
-            String responseContent = response.getContent();
-            assertThat(responseContent, containsString("requestURI=%s%n".formatted(path)));
-            assertThat(responseContent, containsString("servletPath=%n".formatted()));
-            String decodedPath = URLDecoder.decode(path, UTF_8);
-            assertThat(responseContent, containsString("pathInfo=%s%n".formatted(decodedPath)));
+            String responseBody = response.getContent();
+            assertThat(responseBody, containsString(String.format("HttpURI.path: %s%n", expectedPath)));
         }
     }
 }
