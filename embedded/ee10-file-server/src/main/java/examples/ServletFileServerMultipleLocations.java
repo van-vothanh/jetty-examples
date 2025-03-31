@@ -14,9 +14,20 @@
 package examples;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
@@ -26,6 +37,8 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Using a {@link ServletContextHandler} serve static file content from multiple locations.
@@ -40,6 +53,8 @@ import org.eclipse.jetty.util.resource.Resources;
  */
 public class ServletFileServerMultipleLocations
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ServletFileServerMultipleLocations.class);
+
     public static void main(String[] args) throws Exception
     {
         Path altPath = Paths.get("webapps/alt-root").toRealPath();
@@ -71,7 +86,7 @@ public class ServletFileServerMultipleLocations
 
         // add special pathspec of "/alt/" content mapped to the altPath
         ServletHolder holderAlt = new ServletHolder("static-alt", ResourceServlet.class);
-        holderAlt.setInitParameter("resourceBase", altPath.toUri().toASCIIString());
+        holderAlt.setInitParameter("baseResource", altPath.toUri().toASCIIString());
         holderAlt.setInitParameter("dirAllowed", "true");
         holderAlt.setInitParameter("pathInfoOnly", "true");
         context.addServlet(holderAlt, "/alt/*");
@@ -82,6 +97,118 @@ public class ServletFileServerMultipleLocations
         holderDef.setInitParameter("dirAllowed", "true");
         context.addServlet(holderDef, "/");
 
+        // Some filter to show that you can modify things on the response from a static resource.
+        context.addFilter(new VaryFilter(), "/*", EnumSet.of(DispatcherType.REQUEST));
+
         return server;
+    }
+
+    public static class VaryFilter implements Filter
+    {
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
+        {
+            HttpServletResponse httpResponse = (HttpServletResponse)response;
+            VaryResponseWrapper varyResponseWrapper = new VaryResponseWrapper(httpResponse);
+            chain.doFilter(request, varyResponseWrapper);
+        }
+    }
+
+    public static class VaryResponseWrapper extends HttpServletResponseWrapper
+    {
+        public VaryResponseWrapper(HttpServletResponse response)
+        {
+            super(response);
+        }
+
+        @Override
+        public void addCookie(Cookie cookie)
+        {
+            if (isCommitted())
+            {
+                LOG.warn("addCookie after commit");
+                return;
+            }
+            // only modify the "foo" named cookie
+            if (cookie.getName().equals("foo"))
+            {
+                cookie.setValue("always-bar");
+            }
+            super.addCookie(cookie);
+        }
+
+        @Override
+        public void addHeader(String name, String value)
+        {
+            if (isCommitted())
+            {
+                LOG.warn("addHeader after commit");
+                return;
+            }
+
+            if (name.equalsIgnoreCase("accept-ranges"))
+            {
+                // filter it out, we don't want this to arrive in response.
+                return;
+            }
+            else if (name.equalsIgnoreCase("set-cookie"))
+            {
+                if (value != null && value.contains("foo"))
+                {
+                    String newValue = "bar-always-bar";
+                    super.addHeader(name, newValue);
+                    return;
+                }
+            }
+            else if (name.equalsIgnoreCase("vary"))
+            {
+                if (value != null && value.contains("accept-encoding"))
+                {
+                    String newValue = "x-accept-encoding";
+                    super.addHeader(name, newValue);
+                    return;
+                }
+            }
+            super.addHeader(name, value);
+        }
+
+        @Override
+        public void setHeader(String name, String value)
+        {
+            // per servlet spec, a null name or value is a no-op
+            if (name == null || value == null)
+                return;
+
+            if (isCommitted())
+            {
+                LOG.warn("setHeader after commit");
+                return;
+            }
+
+            if (name.equalsIgnoreCase("accept-ranges"))
+            {
+                // filter it out, we don't want this to arrive in response.
+                return;
+            }
+            else if (name.equalsIgnoreCase("set-cookie"))
+            {
+                if (value.contains("foo"))
+                {
+                    String newValue = "bar-always-bar";
+                    super.setHeader(name, newValue);
+                    return;
+                }
+            }
+            else if (name.equalsIgnoreCase("vary"))
+            {
+                if (value.contains("accept-encoding"))
+                {
+                    String newValue = "x-accept-encoding";
+                    super.setHeader(name, newValue);
+                    return;
+                }
+            }
+            super.setHeader(name, value);
+        }
     }
 }

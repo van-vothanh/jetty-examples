@@ -53,6 +53,7 @@ public class ServletFileServerSingleLocation
         context.setBaseResource(baseResource);
         server.setHandler(context);
 
+        // Default behavior
         ServletHolder holderPwd = new ServletHolder("default", DefaultServlet.class);
         holderPwd.setInitParameter("dirAllowed", "true");
         context.addServlet(holderPwd, "/");

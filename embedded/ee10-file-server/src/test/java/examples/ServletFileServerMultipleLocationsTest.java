@@ -16,7 +16,9 @@ package examples;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.toolchain.test.FS;
@@ -54,6 +56,9 @@ public class ServletFileServerMultipleLocationsTest
         if (largeSha == null)
             largeSha = StaticFileGen.generate(resourcesRoot.resolve("large.mkv"), largeSize);
 
+        Path altIndexTxt = resourcesRoot.resolve("index.txt");
+        Files.writeString(altIndexTxt, "Alt Index TEXT", StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
         server = ServletFileServerMultipleLocations.newServer(0, resourcesRoot);
         server.start();
     }
@@ -76,6 +81,7 @@ public class ServletFileServerMultipleLocationsTest
         /deeper/        | This is the foo.htm
         /deeper/foo.htm | This is the foo.htm
         /deeper/alt.txt | This is the alt.txt
+        /alt/index.txt  | Alt Index TEXT
         """)
     public void testGet(String requestPath, String expectedContents) throws Exception
     {
