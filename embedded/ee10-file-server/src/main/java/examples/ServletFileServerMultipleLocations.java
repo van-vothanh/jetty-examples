@@ -175,13 +175,20 @@ public class ServletFileServerMultipleLocations
         @Override
         public void setHeader(String name, String value)
         {
-            // per servlet spec, a null name or value is a no-op
-            if (name == null || value == null)
+            // per servlet spec, a null name is a no-op
+            if (name == null)
                 return;
 
             if (isCommitted())
             {
                 LOG.warn("setHeader after commit");
+                return;
+            }
+
+            if (value == null)
+            {
+                // per servlet spec, a null value is a REMOVE of a header.
+                setHeader(name, value);
                 return;
             }
 
