@@ -116,9 +116,18 @@ public class ServletFileServerMultipleLocations
 
     public static class VaryResponseWrapper extends HttpServletResponseWrapper
     {
+        private static final Logger LOG = LoggerFactory.getLogger(VaryResponseWrapper.class);
+
         public VaryResponseWrapper(HttpServletResponse response)
         {
             super(response);
+        }
+
+        @Override
+        public void flushBuffer() throws IOException
+        {
+            LOG.info("flushBuffer");
+            super.flushBuffer();
         }
 
         @Override
@@ -188,7 +197,7 @@ public class ServletFileServerMultipleLocations
             if (value == null)
             {
                 // per servlet spec, a null value is a REMOVE of a header.
-                setHeader(name, value);
+                super.setHeader(name, value);
                 return;
             }
 
