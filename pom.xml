@@ -18,6 +18,7 @@
     <module>standalone</module>
     <module>webapps</module>
   </modules>
+
   <scm>
     <connection>scm:git:https://github.com/jetty/${jetty.git.repo}.git</connection>
     <developerConnection>scm:git:git@github.com:jetty/${jetty.git.repo}.git</developerConnection>
@@ -46,4 +47,17 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>staging-repo</id>
+      <repositories>
+        <repository>
+          <id>oss-staging-repo</id>
+          <name>oss staging repo</name>
+          <url>https://oss.sonatype.org/content/groups/jetty-with-staging/</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </project>
