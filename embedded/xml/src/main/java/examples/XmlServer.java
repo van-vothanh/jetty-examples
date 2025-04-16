@@ -19,7 +19,6 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public class XmlServer
         // Bonus is we also learn what JAR files we need.
         // And if we look at tmpdir/start.ini we can also know what properties can be set.
 
-        Path homeXmlPath = Paths.get("src/main/xml/home");
+        Path homeXmlPath = Path.of("src/main/xml/home");
         xmls.add(new PathResource(homeXmlPath.resolve("jetty-bytebufferpool.xml")));
         xmls.add(new PathResource(homeXmlPath.resolve("jetty-threadpool.xml")));
         xmls.add(new PathResource(homeXmlPath.resolve("jetty.xml")));
@@ -79,7 +78,7 @@ public class XmlServer
 
         // Now we add our customizations
         // In this case, it's 2 ServletContextHandlers
-        Path customBasePath = Paths.get("src/main/xml/base");
+        Path customBasePath = Path.of("src/main/xml/base");
         xmls.add(new PathResource(customBasePath.resolve("context-foo.xml")));
         xmls.add(new PathResource(customBasePath.resolve("context-bar.xml")));
 
@@ -87,7 +86,7 @@ public class XmlServer
         Map<String, String> customProps = loadProperties(customBasePath.resolve("custom.properties"));
 
         // Create a path suitable for output / work directory / etc.
-        Path outputPath = Paths.get("target/xmlserver-output");
+        Path outputPath = Path.of("target/xmlserver-output");
         Path resourcesPath = outputPath.resolve("resources");
 
         ensureDirExists(outputPath);

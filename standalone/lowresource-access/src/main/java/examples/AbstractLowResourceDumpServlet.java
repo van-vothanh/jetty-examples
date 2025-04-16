@@ -28,7 +28,7 @@ public class AbstractLowResourceDumpServlet extends HttpServlet
         out.println("LowResourceChecks: ");
         for (LowResourceMonitor.LowResourceCheck check : checks)
         {
-            out.println(String.format("   (%s) %s%n", check.getClass().getName(), check));
+            out.println("   (%s) %s%n".formatted(check.getClass().getName(), check));
         }
     }
 }

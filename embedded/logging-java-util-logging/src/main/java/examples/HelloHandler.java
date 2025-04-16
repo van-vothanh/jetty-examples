@@ -34,7 +34,7 @@ public class HelloHandler extends AbstractHandler
 
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
-        LOG.info(String.format("Got request from %s for %s",request.getRemoteAddr(), request.getRequestURL()));
+        LOG.info("Got request from %s for %s".formatted(request.getRemoteAddr(), request.getRequestURL()));
         response.setContentType("text/plain");
         response.getWriter().printf("%s%n",msg);
         baseRequest.setHandled(true);

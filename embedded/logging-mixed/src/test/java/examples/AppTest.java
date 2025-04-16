@@ -70,7 +70,7 @@ public class AppTest
             host = "localhost";
         }
         int port = connector.getLocalPort();
-        serverUri = new URI(String.format("http://%s:%d/",host,port));
+        serverUri = new URI("http://%s:%d/".formatted(host, port));
     }
 
     @AfterEach

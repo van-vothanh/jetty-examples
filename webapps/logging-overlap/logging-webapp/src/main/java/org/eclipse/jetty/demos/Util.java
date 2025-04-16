@@ -27,7 +27,7 @@ public class Util
     {
         if (obj == null)
             return "<null>";
-        return String.format("%s@%X - %s", obj.getClass().getName(), obj.hashCode(), obj);
+        return "%s@%X - %s".formatted(obj.getClass().getName(), obj.hashCode(), obj);
     }
 
     public static URI getCodeSourceLocation(Class<?> clazz)
