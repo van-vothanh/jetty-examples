@@ -35,9 +35,8 @@ public class JulFilter implements Filter
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
-        if (request instanceof HttpServletRequest)
+        if (request instanceof HttpServletRequest httpServletRequest)
         {
-            HttpServletRequest httpServletRequest = (HttpServletRequest)request;
             LOG.info("java.util.logging sees the request: " + httpServletRequest.getRequestURI());
         }
         chain.doFilter(request, response);

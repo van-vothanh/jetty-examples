@@ -38,6 +38,6 @@ public class TimeServlet extends HttpServlet
         String dateStr = DateFormat.getDateInstance(DateFormat.DEFAULT,locale).format(cal.getTime());
         String timeStr = DateFormat.getTimeInstance(DateFormat.DEFAULT,locale).format(cal.getTime());
         String tzStr = TZ.getDisplayName(false,TimeZone.SHORT,locale);
-        resp.getWriter().println(String.format("%s %s %s",dateStr,timeStr,tzStr));
+        resp.getWriter().println("%s %s %s".formatted(dateStr, timeStr, tzStr));
     }
 }

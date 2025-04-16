@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import org.eclipse.jetty.server.Server;
@@ -81,7 +80,7 @@ public class EmbedMe
         // Look for resource in common file system paths
         try
         {
-            Path pwd = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+            Path pwd = Path.of(System.getProperty("user.dir")).toAbsolutePath();
             Path targetDir = pwd.resolve("target");
             if (Files.isDirectory(targetDir))
             {

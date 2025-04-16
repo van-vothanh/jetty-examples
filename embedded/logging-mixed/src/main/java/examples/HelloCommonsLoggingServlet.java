@@ -36,8 +36,7 @@ public class HelloCommonsLoggingServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        LOG.info(String.format(
-            "Got request from %s for %s",
+        LOG.info("Got request from %s for %s".formatted(
             request.getRemoteAddr(), request.getRequestURL()));
         response.setContentType("text/plain");
         response.getWriter().printf("%s%n",msg);
