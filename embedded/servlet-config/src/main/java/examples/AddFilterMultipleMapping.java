@@ -46,9 +46,9 @@ public class AddFilterMultipleMapping
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
         {
-            if (response instanceof HttpServletResponse)
+            if (response instanceof HttpServletResponse servletResponse)
             {
-                ((HttpServletResponse)response).addHeader("X-Demo", "was-filtered");
+                servletResponse.addHeader("X-Demo", "was-filtered");
             }
             chain.doFilter(request, response);
         }

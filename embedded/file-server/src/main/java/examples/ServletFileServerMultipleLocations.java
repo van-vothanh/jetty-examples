@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -45,7 +44,7 @@ public class ServletFileServerMultipleLocations
         URI webRootUri = findDefaultBaseResource();
         System.err.println("Default Base Resource is " + webRootUri);
 
-        Path altPath = Paths.get("webapps/alt-root").toRealPath();
+        Path altPath = Path.of("webapps/alt-root").toRealPath();
         System.err.println("Alt Base Resource is " + altPath);
 
         Server server = ServletFileServerMultipleLocations.newServer(8080, webRootUri, altPath);

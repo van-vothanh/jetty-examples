@@ -34,12 +34,12 @@ public class TimeServlet extends HttpServlet
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
     {
-        logger.info(String.format("%s:%d Requested Time", req.getRemoteAddr(), req.getRemotePort()));
+        logger.info("%s:%d Requested Time".formatted(req.getRemoteAddr(), req.getRemotePort()));
         Locale locale = req.getLocale();
         Calendar cal = Calendar.getInstance(TZ, locale);
         String dateStr = DateFormat.getDateInstance(DateFormat.DEFAULT, locale).format(cal.getTime());
         String timeStr = DateFormat.getTimeInstance(DateFormat.DEFAULT, locale).format(cal.getTime());
         String tzStr = TZ.getDisplayName(false, TimeZone.SHORT, locale);
-        resp.getWriter().println(String.format("%s %s %s", dateStr, timeStr, tzStr));
+        resp.getWriter().println("%s %s %s".formatted(dateStr, timeStr, tzStr));
     }
 }

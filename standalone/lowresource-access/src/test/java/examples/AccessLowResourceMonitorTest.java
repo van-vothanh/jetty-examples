@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.jetty.deploy.DeploymentManager;
 import org.eclipse.jetty.deploy.PropertiesConfigurationManager;
@@ -59,12 +58,12 @@ public class AccessLowResourceMonitorTest
         server.setHandler(handlers);
 
         // create War
-        Path jettyBase = Paths.get(System.getProperty("user.dir"));
+        Path jettyBase = Path.of(System.getProperty("user.dir"));
         Path webappsDir = jettyBase.resolve("webapps");
         try (WarBuilder war = new WarBuilder(webappsDir.resolve("demo.war")))
         {
-            war.addClasses(Paths.get("target/classes"));
-            war.addDir(Paths.get("src/main/webapp"));
+            war.addClasses(Path.of("target/classes"));
+            war.addDir(Path.of("src/main/webapp"));
         }
 
         // enable hot deployment

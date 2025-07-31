@@ -62,7 +62,7 @@ public class JakartaBrowserSocket
                 {
                     randomText[i] = letters[rand.nextInt(lettersLen)];
                 }
-                msg = String.format("ManyThreads [%s]", String.valueOf(randomText));
+                msg = "ManyThreads [%s]".formatted(String.valueOf(randomText));
                 remote.sendText(msg);
             }
         }
@@ -218,6 +218,6 @@ public class JakartaBrowserSocket
 
     private void writeMessage(String format, Object... args)
     {
-        writeMessage(String.format(format, args));
+        writeMessage(format.formatted(args));
     }
 }

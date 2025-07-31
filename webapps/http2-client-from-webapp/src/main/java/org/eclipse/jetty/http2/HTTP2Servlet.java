@@ -57,7 +57,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
             client.setSelectors(1);
             client.start();
 
-            logger.info(String.format("Created %s", client));
+            logger.info("Created %s".formatted(client));
         } catch (Exception x) {
             throw new ServletException(x);
         }
@@ -65,7 +65,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        logger.info(String.format("Request %s", request.getRequestURI()));
+        logger.info("Request %s".formatted(request.getRequestURI()));
 
         AsyncContext asyncContext = request.startAsync();
         asyncContext.setTimeout(0);
@@ -76,7 +76,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
         client.connect(sslContextFactory, new InetSocketAddress(address, port), new ServerSessionListener.Adapter(), new Promise<Session>() {
             @Override
             public void succeeded(Session session) {
-                logger.info(String.format("Connect successful, session=%s", session));
+                logger.info("Connect successful, session=%s".formatted(session));
 
                 HttpURI uri = new HttpURI("https://" + host + ":" + port + "/");
                 MetaData.Request metaData = new MetaData.Request("GET", uri, HttpVersion.HTTP_2, new HttpFields());
@@ -84,7 +84,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
                 session.newStream(frame, new Promise<Stream>() {
                     @Override
                     public void succeeded(Stream stream) {
-                        logger.info(String.format("Stream successful, stream=%s", stream));
+                        logger.info("Stream successful, stream=%s".formatted(stream));
                     }
 
                     @Override
@@ -98,7 +98,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
                     public void onHeaders(Stream stream, HeadersFrame frame) {
                         MetaData.Response metaDataResponse = (MetaData.Response)frame.getMetaData();
                         int status = metaDataResponse.getStatus();
-                        logger.info(String.format("Stream response, status=%d", status));
+                        logger.info("Stream response, status=%d".formatted(status));
                         response.setStatus(status);
                         response.setCharacterEncoding("utf-8");
                         String contentType = metaDataResponse.getFields().get(HttpHeader.CONTENT_TYPE);
@@ -110,7 +110,7 @@ public class HTTP2Servlet extends javax.servlet.http.HttpServlet {
 
                     @Override
                     public void onData(Stream stream, DataFrame frame, Callback callback) {
-                        logger.info(String.format("Stream response content, bytes=%d", frame.getData().remaining()));
+                        logger.info("Stream response content, bytes=%d".formatted(frame.getData().remaining()));
                         try {
                             response.getOutputStream().write(BufferUtil.toArray(frame.getData()));
                         } catch (IOException e) {
