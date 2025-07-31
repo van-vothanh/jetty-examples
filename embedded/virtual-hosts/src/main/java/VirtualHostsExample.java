@@ -79,7 +79,7 @@ public class VirtualHostsExample
         try (Socket client = new Socket("localhost", 8080))
         {
             System.out.printf("%n-- testRequest [%s] [%s] --%n", host, path);
-            String req = String.format("GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", path, host);
+            String req = "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n".formatted(path, host);
             System.out.print(req);
             client.getOutputStream().write(req.getBytes(StandardCharsets.UTF_8));
             String response = IO.toString(client.getInputStream());

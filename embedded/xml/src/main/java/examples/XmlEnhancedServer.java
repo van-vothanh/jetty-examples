@@ -16,7 +16,6 @@ package examples;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,7 +123,7 @@ public class XmlEnhancedServer
             XmlConfiguration lastConfig = null;
             for (String xml : args)
             {
-                Path xmlPath = Paths.get(xml);
+                Path xmlPath = Path.of(xml);
                 System.err.println("Applying XML: " + xmlPath);
                 PathResource xmlResource = new PathResource(xmlPath);
                 XmlConfiguration configuration = new XmlConfiguration(xmlResource);

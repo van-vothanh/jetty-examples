@@ -22,7 +22,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -55,10 +54,12 @@ public class MovedPermanentlyRuleExample
              * response header containing the new location of
              * https://api.example.org/dump/
              */
-            String rawRequest = "GET /dump/ HTTP/1.1\r\n" +
-                "Host: www.example.org\r\n" +
-                "Connection: close\r\n" +
-                "\r\n";
+            String rawRequest = """
+                GET /dump/ HTTP/1.1
+                Host: www.example.org
+                Connection: close
+                
+                """;
 
             example.testRequest(serverURI.getHost(), serverURI.getPort(), rawRequest);
         }
@@ -88,7 +89,7 @@ public class MovedPermanentlyRuleExample
         rewriteHandler.addRule(movedRule);
         handlers.addHandler(rewriteHandler);
 
-        Path webRootPath = Paths.get("webapps/alt-root/").toAbsolutePath().normalize();
+        Path webRootPath = Path.of("webapps/alt-root/").toAbsolutePath().normalize();
         if (!Files.isDirectory(webRootPath))
         {
             System.err.println("ERROR: Unable to find " + webRootPath + ".");

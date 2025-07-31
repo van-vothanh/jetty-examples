@@ -77,9 +77,8 @@ public class ServletTransportGuaranteeExample
 
         // Setup security constraint
         SecurityHandler security = context.getSecurityHandler();
-        if (security instanceof ConstraintAware)
+        if (security instanceof ConstraintAware constraint)
         {
-            ConstraintAware constraint = (ConstraintAware)security;
             ConstraintMapping mapping = new ConstraintMapping();
             mapping.setPathSpec("/*");
             Constraint dc = new Constraint();

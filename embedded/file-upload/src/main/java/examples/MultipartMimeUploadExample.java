@@ -24,7 +24,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
@@ -91,11 +90,11 @@ public class MultipartMimeUploadExample
         server.addConnector(httpsConnector);
 
         // Establish output directory
-        Path outputDir = Paths.get("target", "upload-dir");
+        Path outputDir = Path.of("target", "upload-dir");
         outputDir = ensureDirExists(outputDir);
 
         // MultiPartConfig setup - to allow for ServletRequest.getParts() usage
-        Path multipartTmpDir = Paths.get("target", "multipart-tmp");
+        Path multipartTmpDir = Path.of("target", "multipart-tmp");
         multipartTmpDir = ensureDirExists(multipartTmpDir);
 
         String location = multipartTmpDir.toString();

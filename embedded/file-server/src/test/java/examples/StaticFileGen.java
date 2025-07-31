@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
@@ -85,7 +84,7 @@ public class StaticFileGen
 
     public static Path tempDir(String directoryName)
     {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"), directoryName);
+        Path tempDir = Path.of(System.getProperty("java.io.tmpdir"), directoryName);
         FS.ensureDirExists(tempDir);
         return tempDir;
     }

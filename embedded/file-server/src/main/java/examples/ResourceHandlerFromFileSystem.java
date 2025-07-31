@@ -15,7 +15,6 @@ package examples;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -25,7 +24,7 @@ public class ResourceHandlerFromFileSystem
 {
     public static void main(String[] args) throws Exception
     {
-        Path webRootPath = Paths.get("webapps/alt-root/").toAbsolutePath().normalize();
+        Path webRootPath = Path.of("webapps/alt-root/").toAbsolutePath().normalize();
         if (!Files.isDirectory(webRootPath))
         {
             System.err.println("ERROR: Unable to find " + webRootPath + ".");

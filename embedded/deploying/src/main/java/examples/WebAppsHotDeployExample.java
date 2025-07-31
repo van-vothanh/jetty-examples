@@ -16,7 +16,6 @@ package examples;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class WebAppsHotDeployExample
 
         server.setHandler(handlers);
 
-        Path confFile = Paths.get(System.getProperty("user.dir"), "example.conf");
+        Path confFile = Path.of(System.getProperty("user.dir"), "example.conf");
 
         ContextAttributeCustomizer contextAttributeCustomizer = new ContextAttributeCustomizer();
         contextAttributeCustomizer.setAttribute("common.conf", confFile);

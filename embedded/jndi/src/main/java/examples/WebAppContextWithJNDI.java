@@ -19,7 +19,7 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import javax.naming.InitialContext;
@@ -100,7 +100,7 @@ public class WebAppContextWithJNDI
         WebAppContext context = new WebAppContext();
         context.setContextPath("/");
         // This directory only has WEB-INF/web.xml
-        context.setBaseResource(new PathResource(Paths.get("src/main/webroots/jndi-root")));
+        context.setBaseResource(new PathResource(Path.of("src/main/webroots/jndi-root")));
         context.addServlet(JndiDumpServlet.class, "/jndi-dump");
 
         new org.eclipse.jetty.plus.jndi.Resource(null, "val/foo", Integer.valueOf(770));

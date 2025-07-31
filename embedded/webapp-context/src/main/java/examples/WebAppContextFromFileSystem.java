@@ -15,7 +15,6 @@ package examples;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -26,7 +25,7 @@ public class WebAppContextFromFileSystem
     {
         Server server = new Server(8080);
 
-        Path warPath = Paths.get("../../webapps/hello/target/hello.war").toAbsolutePath().normalize();
+        Path warPath = Path.of("../../webapps/hello/target/hello.war").toAbsolutePath().normalize();
         if (!Files.isRegularFile(warPath))
         {
             System.err.println("Unable to find " + warPath + ".  Please build the entire project once first (`mvn clean install` from top of repo)");

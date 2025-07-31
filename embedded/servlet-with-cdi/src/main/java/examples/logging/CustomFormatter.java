@@ -48,7 +48,7 @@ public class CustomFormatter extends Formatter
             source = record.getLoggerName();
         }
         String message = formatMessage(record);
-        String threadId = String.valueOf(record.getThreadID());
+        String threadId = String.valueOf(record.getLongThreadID());
         String shortName = record.getLoggerName();
         int lastDot = shortName.lastIndexOf('.');
         if (lastDot > 0)
@@ -64,7 +64,7 @@ public class CustomFormatter extends Formatter
             throwable = sw.toString();
         }
 
-        return String.format(format, dat, // %1
+        return format.formatted(dat, // %1
             source, // %2
             record.getLoggerName(), // %3
             shortName, // %4

@@ -67,9 +67,8 @@ public class JakartaBrowserMainTest
 
         for (Connector connector : server.getConnectors())
         {
-            if (connector instanceof ServerConnector)
+            if (connector instanceof ServerConnector serverConnector)
             {
-                ServerConnector serverConnector = (ServerConnector)connector;
                 SslConnectionFactory sslConnectionFactory = serverConnector.getConnectionFactory(SslConnectionFactory.class);
                 if (sslConnectionFactory != null)
                 {

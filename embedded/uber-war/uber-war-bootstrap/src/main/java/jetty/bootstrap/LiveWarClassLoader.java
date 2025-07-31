@@ -161,6 +161,6 @@ public class LiveWarClassLoader extends ClassLoader implements Closeable
     @Override
     public String toString()
     {
-        return String.format("%s[%s]",this.getClass().getName(),this.warFileUri);
+        return "%s[%s]".formatted(this.getClass().getName(), this.warFileUri);
     }
 }
